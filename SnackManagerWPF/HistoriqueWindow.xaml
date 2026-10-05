@@ -1,0 +1,208 @@
+﻿<Window x:Class="SnackManagerWPF.HistoriqueWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Tableau de Bord - Historique" Height="600" Width="900" 
+        WindowStartupLocation="CenterScreen"
+        Background="#F3F4F6">
+    <!-- Fond général gris très clair -->
+
+    <Window.Resources>
+        <!-- STYLE DU DATAGRID (TABLEAU) -->
+        <Style TargetType="DataGrid">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="RowHeaderWidth" Value="0"/>
+            <Setter Property="GridLinesVisibility" Value="Horizontal"/>
+            <Setter Property="HorizontalGridLinesBrush" Value="#EEEEEE"/>
+            <Setter Property="AlternatingRowBackground" Value="#FAFAFA"/>
+        </Style>
+
+        <!-- STYLE DES EN-TÊTES DE COLONNES -->
+        <Style TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#666"/>
+            <Setter Property="Padding" Value="10,15,10,15"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <Setter Property="BorderBrush" Value="#DDD"/>
+        </Style>
+
+        <!-- STYLE DES CELLULES (PADDING) -->
+        <Style TargetType="DataGridCell">
+            <Setter Property="Padding" Value="10"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="DataGridCell">
+                        <Border Padding="{TemplateBinding Padding}" 
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}" 
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- STYLE BOUTON MODERNE -->
+        <Style x:Key="BtnStyle" TargetType="Button">
+            <Setter Property="Background" Value="#3B82F6"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="15,8"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="6">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Opacity" Value="0.9"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- Titre + Filtres -->
+            <RowDefinition Height="*"/>
+            <!-- Tableau -->
+            <RowDefinition Height="Auto"/>
+            <!-- Cartes Totaux -->
+        </Grid.RowDefinitions>
+
+        <!-- ZONE 1 : EN-TÊTE ET FILTRES -->
+        <Grid Grid.Row="0" Margin="0,0,0,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Titre -->
+            <StackPanel>
+                <TextBlock Text="Historique des Ventes" FontSize="24" FontWeight="Bold" Foreground="#111827"/>
+                <TextBlock Text="Consultez vos performances journalières" FontSize="14" Foreground="#6B7280" Margin="0,5,0,0"/>
+            </StackPanel>
+
+            <!-- Filtres (à droite) -->
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Background="White" CornerRadius="6" Padding="5" Margin="0,0,10,0" Width="221">
+                    <DatePicker Name="SelecteurDate" 
+                                SelectedDateChanged="SelecteurDate_SelectedDateChanged" 
+                                Width="140" 
+                                BorderThickness="0" 
+                                VerticalAlignment="Center"/>
+                </Border>
+
+                <Button Content="Voir Tout" 
+                        Click="BtnToutAfficher_Click" 
+                        Style="{StaticResource BtnStyle}" 
+                        Background="#6366F1" Width="120"/>
+                <!-- Couleur Indigo -->
+            </StackPanel>
+        </Grid>
+
+        <!-- ZONE 2 : TABLEAU (DANS UNE CARTE BLANCHE) -->
+        <Border Grid.Row="1" Background="White" CornerRadius="10" Padding="0" Margin="0,0,0,20">
+            <Border.Effect>
+                <DropShadowEffect Color="Black" Direction="270" ShadowDepth="2" Opacity="0.05" BlurRadius="10"/>
+            </Border.Effect>
+
+            <DataGrid Name="GrilleHistorique" 
+                      AutoGenerateColumns="False" 
+                      IsReadOnly="True" 
+                      HeadersVisibility="Column"
+                      BorderThickness="0">
+                <DataGrid.Columns>
+                    <!-- ID (Petit badge gris) -->
+                    <DataGridTemplateColumn Header="N°" Width="60">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border Background="#F3F4F6" CornerRadius="4" Padding="5,2" HorizontalAlignment="Center">
+                                    <TextBlock Text="{Binding Id}" FontWeight="Bold" Foreground="#555"/>
+                                </Border>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <!-- HEURE -->
+                    <DataGridTextColumn Header="HEURE" Binding="{Binding DateCommande, StringFormat=HH:mm}" Width="80" Foreground="#555"/>
+
+                    <!-- DETAILS -->
+                    <DataGridTextColumn Header="DÉTAILS COMMANDE" Binding="{Binding DetailsArticles}" Width="*" Foreground="#333">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="TextWrapping" Value="Wrap"/>
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+
+                    <!-- MONTANT (Vert et Gras) -->
+                    <DataGridTextColumn Header="MONTANT" Binding="{Binding MontantTotal, StringFormat={}{0:N2} DH}" Width="120">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="FontWeight" Value="Bold"/>
+                                <Setter Property="Foreground" Value="#059669"/>
+                                <!-- Vert émeraude -->
+                                <Setter Property="HorizontalAlignment" Value="Right"/>
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+
+        <!-- ZONE 3 : STATISTIQUES (CARTES DU BAS) -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Carte 1 : Nombre de commandes -->
+            <Border Grid.Column="0" Background="White" CornerRadius="10" Padding="20" Margin="0,0,10,0">
+                <Border.Effect>
+                    <DropShadowEffect Color="Black" Direction="270" ShadowDepth="2" Opacity="0.05" BlurRadius="10"/>
+                </Border.Effect>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <!-- Icone ronde (simulée avec Border) -->
+                    <Border Width="50" Height="50" CornerRadius="25" Background="#EFF6FF" Margin="0,0,15,0">
+                        <TextBlock Text="📦" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Total Commandes" Foreground="#6B7280" FontSize="13"/>
+                        <TextBlock Name="TxtNombre" Text="0" FontSize="24" FontWeight="Bold" Foreground="#1E40AF"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Carte 2 : Chiffre d'Affaires -->
+            <Border Grid.Column="1" Background="White" CornerRadius="10" Padding="20" Margin="10,0,0,0">
+                <Border.Effect>
+                    <DropShadowEffect Color="Black" Direction="270" ShadowDepth="2" Opacity="0.05" BlurRadius="10"/>
+                </Border.Effect>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <!-- Icone ronde -->
+                    <Border Width="50" Height="50" CornerRadius="25" Background="#ECFDF5" Margin="0,0,15,0">
+                        <TextBlock Text="💰" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Chiffre d'Affaires" Foreground="#6B7280" FontSize="13"/>
+                        <TextBlock Name="TxtTotalJour" Text="0.00 DH" FontSize="24" FontWeight="Bold" Foreground="#059669"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>
